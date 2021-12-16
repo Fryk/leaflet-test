@@ -1,0 +1,24 @@
+.header {
+  text-align: center;
+  text-transform: uppercase;
+  color: crimson;
+  font-weight: bold;
+}
+
+.inlineList {
+  li {
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px 10px;
+    border: black solid 1px;
+    border-left: none;
+
+    &:first-child {
+      border: black solid 1px;
+    }
+
+    &:hover {
+      color: crimson;
+    }
+  }
+}
