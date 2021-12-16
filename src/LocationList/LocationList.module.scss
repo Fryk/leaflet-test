@@ -1,0 +1,21 @@
+.inlineList {
+  padding: 0;
+  margin: 0 25px;
+  li {
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 5px;
+    border: black solid 1px;
+    color: crimson;
+
+    &:hover {
+      color: white;
+      background: crimson;
+    }
+
+    &.visited {
+      color: yellowgreen;
+    }
+  }
+}

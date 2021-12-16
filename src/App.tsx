@@ -8,19 +8,15 @@ import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import { CustomMarker } from './Model/CustomMarker';
+
+import Menu from './Menu/Menu'
+import LocationList from './LocationList/LocationList';
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow
 });
-
-interface CustomMarker {
-    x: number;
-    y: number;
-    label: string;
-    id: number;
-    visited: boolean;
-}
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
@@ -43,12 +39,14 @@ function App() {
     const [customMarkers, setCustomMarkers] = useState([]);
     const [map, setMap] = useState(null);
 
+    const calculateRoute = () => {};
+
     function addRandomMarker(event) {
         const markers: CustomMarker[] = [...customMarkers];
-        const id = Math.round(Math.random() * 999);
+        const id = Math.round(Math.random() * 99999);
         const newMarker = {
-            x: 51.505 + Math.random() * 0.1 - 0.5,
-            y: -0.09 + (Math.random() * 0.05),
+            x: 51.505 + (Math.random() * 0.1 - 0.05),
+            y: -0.09 + (Math.random() * 0.1 - 0.05),
             label: `Marker ${id}`,
             id,
             visited: false
@@ -81,20 +79,8 @@ function App() {
             <div>
                 <h1 className={styles.header}>Santracking</h1>
             </div>
-            <div>
-                <ul className={styles.inlineList}>
-                    <li onClick={addRandomMarker}>Add random marker</li>
-                </ul>
-            </div>
-            <div>
-                <ul className={styles.inlineList}>
-                    {
-                        customMarkers.map((marker) => (
-                            <li key={marker.id} onClick={() => centerMap(marker)}>{marker.label}{marker.visited ? ' (visited)' : ''}</li>
-                        ))
-                    }
-                </ul>
-            </div>
+            <Menu onAddRandomMarker={addRandomMarker} onCalculateRoute={calculateRoute}/>
+            <LocationList markers={customMarkers} onCenterMap={centerMap} />
             <div>
                 <MapContainer center={{lat: center[0], lng: center[1]}} zoom={zoom} scrollWheelZoom={false}
                               style={{height: '500px'}} whenCreated={setMap}>
