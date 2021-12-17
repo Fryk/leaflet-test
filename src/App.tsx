@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import styles from './App.module.scss';
 
+import * as salesman from 'salesman.js'
+
 import L, { IconOptions, LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet/dist/images/marker-icon-2x.png';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, Polyline } from 'react-leaflet'
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -32,21 +34,40 @@ const notVisitedIcon = new L.Icon({
     class: 'leaflet-div-icon'
 } as IconOptions);
 
-const center = [51.505, -0.09]
+const limeOptions = {
+    color: 'lime',
+    weight: 5
+}
+
+const center = [51.4, 19.7]
 const zoom = 13
 
 function App() {
     const [customMarkers, setCustomMarkers] = useState([]);
     const [map, setMap] = useState(null);
+    const [showPath, setShowPath] = useState(false);
+    const [path, setPath] = useState([]);
 
-    const calculateRoute = () => {};
+    const calculateRoute = () => {
+        setShowPath(true);
+        const points = customMarkers
+            .filter(m => !m.visited)
+            .map(marker => ({
+                label: marker.label,
+                point: new salesman.Point(marker.x, marker.y)
+            }));
+        const solution = salesman.solve(points.map(p => p.point));
+        const orderedPoints = solution.map(i => points[i].label);
+        setPath(solution.map(i => points[i]).map(p => [p.point.x, p.point.y]));
+    };
 
     function addRandomMarker(event) {
+        setShowPath(false);
         const markers: CustomMarker[] = [...customMarkers];
         const id = Math.round(Math.random() * 99999);
         const newMarker = {
-            x: 51.505 + (Math.random() * 0.1 - 0.05),
-            y: -0.09 + (Math.random() * 0.1 - 0.05),
+            x: center[0] + (Math.random() * 6 - 3),
+            y: center[1] + (Math.random() * 8 - 4),
             label: `Marker ${id}`,
             id,
             visited: false
@@ -69,6 +90,7 @@ function App() {
             const markers = [...customMarkers];
             markers.filter(m => m.id === marker.id).forEach(m => m.visited = true);
             setCustomMarkers(markers);
+            setShowPath(false);
         }
 
         map.setView(latlng);
@@ -80,7 +102,7 @@ function App() {
                 <h1 className={styles.header}>Santracking</h1>
             </div>
             <Menu onAddRandomMarker={addRandomMarker} onCalculateRoute={calculateRoute}/>
-            <LocationList markers={customMarkers} onCenterMap={centerMap} />
+            <LocationList markers={customMarkers} onCenterMap={centerMap}/>
             <div>
                 <MapContainer center={{lat: center[0], lng: center[1]}} zoom={zoom} scrollWheelZoom={false}
                               style={{height: '500px'}} whenCreated={setMap}>
@@ -98,8 +120,12 @@ function App() {
                             </Marker>
                         ))
                     }
+                    {
+                        showPath ? (<Polyline pathOptions={limeOptions} positions={path}/>) : null
+                    }
                 </MapContainer>
             </div>
+
         </div>
     );
 }
